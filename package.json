@@ -1,6 +1,6 @@
 {
   "name": "@artie-owlet/amqplib-wrapper",
-  "version": "1.0.0-dev.0",
+  "version": "1.0.0",
   "description": "",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
