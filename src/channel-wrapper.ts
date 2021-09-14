@@ -5,13 +5,16 @@ import { Channel } from 'amqplib';
 export interface IChannelWrapper<ChannelType extends Channel> extends EventEmitter {
     getChannel(): Promise<ChannelType | null>;
     close(): Promise<void>;
+    reset(): Promise<void>;
+    on(event: 'open', listener: (chan: ChannelType) => void): this;
+    on(event: 'close', listener: () => void): this;
+    on(event: 'error', listener: (err: Error) => void): this;
 }
 
 export class ChannelWrapper<ChannelType extends Channel> extends EventEmitter implements IChannelWrapper<ChannelType> {
     private openPromise: Promise<void>;
     private chan: ChannelType | null = null;
     private closed = false;
-    private failed = false;
 
     constructor(
         private createChannel: () => Promise<ChannelType | null>,
@@ -32,8 +35,14 @@ export class ChannelWrapper<ChannelType extends Channel> extends EventEmitter im
         this.closed = true;
         if (this.chan) {
             await this.chan.close();
-            this.chan = null;
         }
+    }
+
+    public async reset(): Promise<void> {
+        await this.close();
+        this.closed = false;
+        this.openPromise = this.open();
+        await this.openPromise;
     }
 
     private async open(): Promise<void> {
@@ -53,7 +62,7 @@ export class ChannelWrapper<ChannelType extends Channel> extends EventEmitter im
 
             this.emit('open', this.chan);
         } catch (err) {
-            this.failed = true;
+            this.closed = true;
             this.emit('error', err);
         }
     }
@@ -61,13 +70,13 @@ export class ChannelWrapper<ChannelType extends Channel> extends EventEmitter im
     private onClose(): void {
         this.chan = null;
         this.emit('close');
-        if (!this.closed && !this.failed) {
+        if (!this.closed) {
             this.openPromise = this.open();
         }
     }
 
     private onError(err: Error): void {
-        this.failed = true;
+        this.closed = true;
         this.emit('error', err);
     }
 }

@@ -88,3 +88,7 @@ Get amqplib Channel (or ConfirmChannel). Returns `null` if channel was closed wi
 #### close(): Promise<void>
 
 Stop wrapper and close channel.
+
+#### reset(): Promise<void>
+
+Close channel and open a new one.

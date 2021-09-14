@@ -16,57 +16,78 @@ describe('ChannelWrapper', () => {
         mockConf.createThrows = false;
     });
 
-    it('should create Channel and emit "open"', async () => {
-        const chanWrap = new ChannelWrapper<Channel>(createChannelMock);
-        const [echan, gchan] = await Promise.all<Channel, Channel | null>([
-            promisifyEvent<Channel>(chanWrap, 'open'),
-            chanWrap.getChannel(),
-        ]);
-        expect(echan).instanceOf(ChannelMock);
-        expect(echan).equal(gchan);
+    describe('#getChannel()', () => {
+        it('should return Channel', async () => {
+            const chanWrap = new ChannelWrapper<Channel>(createChannelMock);
+            await expect(chanWrap.getChannel()).eventually.instanceOf(ChannelMock);
+        });
+
+        it('should return null after close()', async () => {
+            const chanWrap = new ChannelWrapper<Channel>(createChannelMock);
+            await chanWrap.getChannel();
+            await chanWrap.close();
+            await expect(chanWrap.getChannel()).eventually.equal(null);
+        });
+
+        it('should return null if close() called before opened', async () => {
+            const chanWrap = new ChannelWrapper<Channel>(createChannelMock);
+            await chanWrap.close();
+            await expect(chanWrap.getChannel()).eventually.equal(null);
+        });
+
+        it('should return null if closed with error', async () => {
+            const chanWrap = new ChannelWrapper<Channel>(createChannelMock);
+            chanWrap.on('error', () => {}); // eslint-disable-line @typescript-eslint/no-empty-function
+            const chan = await chanWrap.getChannel();
+            if (!chan) {
+                expect.fail();
+            }
+            chan.emit('error', new Error());
+            chan.emit('close');
+            await expect(chanWrap.getChannel()).eventually.equal(null);
+        });
+
+        it('should return null if createChannel throws', async () => {
+            mockConf.createThrows = true;
+            const chanWrap = new ChannelWrapper<Channel>(createChannelMock);
+            chanWrap.on('error', () => {}); // eslint-disable-line @typescript-eslint/no-empty-function
+            await expect(chanWrap.getChannel()).eventually.equal(null);
+        });
     });
 
-    it('should close Channel',  async () => {
-        const chanWrap = new ChannelWrapper<Channel>(createChannelMock);
-        const chan = await chanWrap.getChannel() as unknown as ChannelMock;
-        await chanWrap.close();
-        expect(chan.closed).equal(true);
+    describe('#close()', () => {
+        it('should close Channel',  async () => {
+            const chanWrap = new ChannelWrapper<Channel>(createChannelMock);
+            const chan = await chanWrap.getChannel() as unknown as ChannelMock;
+            await chanWrap.close();
+            expect(chan.closed).equal(true);
+        });
     });
 
-    it('should create Channel and emit "open" after it is closed without error', async () => {
-        const chanWrap = new ChannelWrapper<Channel>(createChannelMock);
-        const chan = await chanWrap.getChannel();
-        if (!chan) {
-            expect.fail();
-        }
-        chan.emit('close');
-        const chan2 = await chanWrap.getChannel();
-        expect(chan2).instanceOf(ChannelMock);
-        expect(chan2).not.equal(chan);
+    describe('#reset()', () => {
+        it('should close channel and open a new one', async () => {
+            const chanWrap = new ChannelWrapper<Channel>(createChannelMock);
+            const chan = await chanWrap.getChannel();
+            await chanWrap.reset();
+            await expect(chanWrap.getChannel()).eventually.instanceOf(ChannelMock).not.equal(chan);
+        });
     });
 
-    it('should not create Channel after it is closed with error', async () => {
-        const chanWrap = new ChannelWrapper<Channel>(createChannelMock);
-        chanWrap.on('error', () => {}); // eslint-disable-line @typescript-eslint/no-empty-function
-        const chan = await chanWrap.getChannel();
-        if (!chan) {
-            expect.fail();
-        }
-        chan.emit('error', new Error());
-        chan.emit('close');
-        await expect(chanWrap.getChannel()).eventually.equal(null);
-    });
+    describe('#on("open")', () => {
+        it('should be emitted after ChanelWrapper constructed', async () => {
+            const chanWrap = new ChannelWrapper<Channel>(createChannelMock);
+            const chan = await promisifyEvent(chanWrap, 'open');
+            expect(chan).instanceOf(ChannelMock);
+        });
 
-    it('should not create Channel if createChannel throws', async () => {
-        mockConf.createThrows = true;
-        const chanWrap = new ChannelWrapper<Channel>(createChannelMock);
-        chanWrap.on('error', () => {}); // eslint-disable-line @typescript-eslint/no-empty-function
-        await expect(chanWrap.getChannel()).eventually.equal(null);
-    });
-
-    it('should not create Channel if close() called before opened', async () => {
-        const chanWrap = new ChannelWrapper<Channel>(createChannelMock);
-        await chanWrap.close();
-        await expect(chanWrap.getChannel()).eventually.equal(null);
+        it('should be emitted if channel closed without error', async () => {
+            const chanWrap = new ChannelWrapper<Channel>(createChannelMock);
+            const chan = await chanWrap.getChannel();
+            if (!chan) {
+                expect.fail();
+            }
+            chan.emit('close');
+            await expect(promisifyEvent(chanWrap, 'open')).eventually.instanceOf(ChannelMock).not.equal(chan);
+        });
     });
 });
