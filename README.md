@@ -63,11 +63,11 @@ new ConnectionWrapper({
 });
 ```
 
-#### createChannelWrapper(): ChannelWrapper<amqplib.Channel>
+#### createChannelWrapper(): ChannelWrapper\<amqplib.Channel\>
 
 Create amqplib Channel.
 
-#### createConfirmChannelWrapper(): ChannelWrapper<amqplib.ConfirmChannel>
+#### createConfirmChannelWrapper(): ChannelWrapper\<amqplib.ConfirmChannel\>
 
 Create amqplib ConfirmChannel.
 
@@ -75,20 +75,20 @@ Create amqplib ConfirmChannel.
 
 Check is connection [blocked](https://www.rabbitmq.com/connection-blocked.html).
 
-#### close(): Promise<void>
+#### close(): Promise\<void\>
 
 Stop wrapper and close connection.
 
 ### ChannelWrapper
 
-#### getChannel(): Promise<Channel | null>
+#### getChannel(): Promise\<Channel | null\>
 
 Get amqplib Channel (or ConfirmChannel). Returns `null` if channel was closed with error.
 
-#### close(): Promise<void>
+#### close(): Promise\<void\>
 
 Stop wrapper and close channel.
 
-#### reset(): Promise<void>
+#### reset(): Promise\<void\>
 
 Close channel and open a new one.
