@@ -7,6 +7,7 @@ import {
     Options,
     Channel,
     ConfirmChannel,
+    ServerProperties,
 } from 'amqplib';
 
 import { ChannelWrapper } from './channel-wrapper';
@@ -26,6 +27,9 @@ export interface IConnectionWrapper extends EventEmitter {
     createConfirmChannelWrapper(): ChannelWrapper<ConfirmChannel>;
     isBlocked(): boolean;
     close(): Promise<void>;
+    on(event: 'connect', listener: (prop: ServerProperties) => void): this;
+    on(event: 'close', listener: () => void): this;
+    on(event: 'error', listener: (err: Error) => void): this;
 }
 
 export class ConnectionWrapper extends EventEmitter implements IConnectionWrapper {
