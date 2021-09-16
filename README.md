@@ -85,6 +85,10 @@ Stop wrapper and close connection.
 
 Get amqplib Channel (or ConfirmChannel). Returns `null` if channel was closed with error.
 
+#### getChannelSync(): Channel | null
+
+Returns channel if it is currently open, otherwise `null`.
+
 #### close(): Promise\<void\>
 
 Stop wrapper and close channel.

@@ -55,6 +55,26 @@ describe('ChannelWrapper', () => {
         });
     });
 
+    describe('#getChannelSync()', () => {
+        it('should return Channel if it is currently open', async () => {
+            const chanWrap = new ChannelWrapper<Channel>(createChannelMock);
+            await promisifyEvent(chanWrap, 'open');
+            expect(chanWrap.getChannelSync()).instanceOf(ChannelMock);
+        });
+
+        it('should return Channel if channel closed', async () => {
+            const chanWrap = new ChannelWrapper<Channel>(createChannelMock);
+            chanWrap.on('error', () => {}); // eslint-disable-line @typescript-eslint/no-empty-function
+            const chan = await chanWrap.getChannel();
+            if (!chan) {
+                expect.fail();
+            }
+            chan.emit('error', new Error());
+            chan.emit('close');
+            expect(chanWrap.getChannelSync()).equal(null);
+        });
+    });
+
     describe('#close()', () => {
         it('should close Channel',  async () => {
             const chanWrap = new ChannelWrapper<Channel>(createChannelMock);

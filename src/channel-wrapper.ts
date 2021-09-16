@@ -31,6 +31,10 @@ export class ChannelWrapper<ChannelType extends Channel> extends EventEmitter im
         return this.chan;
     }
 
+    public getChannelSync(): ChannelType | null {
+        return this.chan;
+    }
+
     public async close(): Promise<void> {
         this.closed = true;
         if (this.chan) {
