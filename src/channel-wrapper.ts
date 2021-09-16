@@ -4,6 +4,7 @@ import { Channel } from 'amqplib';
 
 export interface IChannelWrapper<ChannelType extends Channel> extends EventEmitter {
     getChannel(): Promise<ChannelType | null>;
+    getChannelSync(): ChannelType | null;
     close(): Promise<void>;
     reset(): Promise<void>;
     on(event: 'open', listener: (chan: ChannelType) => void): this;
