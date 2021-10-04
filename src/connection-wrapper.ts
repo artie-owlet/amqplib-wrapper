@@ -127,9 +127,9 @@ export class ConnectionWrapper extends EventEmitter implements IConnectionWrappe
 
     private onClose(): void {
         this.conn = null;
-        this.emit('close');
         if (!this.closed && this.reconnectTimeout !== undefined) {
             this.connPromise = sleep(this.reconnectTimeout).then(this.connect.bind(this));
         }
+        this.emit('close');
     }
 }
