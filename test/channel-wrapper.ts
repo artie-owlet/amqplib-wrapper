@@ -22,6 +22,26 @@ describe('ChannelWrapper', () => {
             await expect(chanWrap.getChannel()).eventually.instanceOf(ChannelMock);
         });
 
+        it('should return new Channel if current closed without error', async () => {
+            const chanWrap = new ChannelWrapper<Channel>(createChannelMock);
+            const chan = await chanWrap.getChannel();
+            if (!chan) {
+                expect.fail();
+            }
+            let chan2: Channel | null | undefined = undefined;
+            let resolve: (value: void | PromiseLike<void>) => void;
+            const p = new Promise<void>((res) => {
+                resolve = res;
+            });
+            chanWrap.on('close', async () => {
+                chan2 = await chanWrap.getChannel();
+                resolve();
+            });
+            await chan.close();
+            await p;
+            expect(chan2).instanceOf(ChannelMock).not.equal(chan);
+        });
+
         it('should return null after close()', async () => {
             const chanWrap = new ChannelWrapper<Channel>(createChannelMock);
             await chanWrap.getChannel();
