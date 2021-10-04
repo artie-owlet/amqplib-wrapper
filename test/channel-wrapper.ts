@@ -62,7 +62,7 @@ describe('ChannelWrapper', () => {
             expect(chanWrap.getChannelSync()).instanceOf(ChannelMock);
         });
 
-        it('should return Channel if channel closed', async () => {
+        it('should return null if channel closed', async () => {
             const chanWrap = new ChannelWrapper<Channel>(createChannelMock);
             chanWrap.on('error', () => {}); // eslint-disable-line @typescript-eslint/no-empty-function
             const chan = await chanWrap.getChannel();
