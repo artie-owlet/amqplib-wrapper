@@ -75,7 +75,7 @@ export class ChannelWrapper<ChannelType extends Channel> extends EventEmitter im
     private onClose(): void {
         this.chan = null;
         if (!this.closed) {
-            this.openPromise = this.open();
+            this.openPromise = Promise.resolve().then(this.open.bind(this));
         }
         this.emit('close');
     }
