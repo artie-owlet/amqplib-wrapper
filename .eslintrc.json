@@ -35,7 +35,8 @@
     "max-len": [
       "warn",
       {
-        "code": 120
+        "code": 120,
+        "ignoreUrls": true
       }
     ],
     "newline-per-chained-call": [

@@ -3,3 +3,4 @@ dist/
 .eslintcache
 .nyc_output/
 coverage/
+public/

@@ -1,0 +1,13 @@
+{
+  "entryPoints": [
+    "./src/index.ts"
+  ],
+  "readme": "none",
+  "out": "./public",
+  "customCss": "./api.css",
+  "name": "amqplib-wrapper API",
+  "includeVersion": true,
+  "disableSources": true,
+  "excludePrivate": true,
+  "excludeExternals": true
+}

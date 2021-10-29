@@ -1,2 +1,2 @@
-export { ConnectionWrapper, IConnectionWrapper, IConnectOptions } from './connection-wrapper';
-export { IChannelWrapper } from './channel-wrapper';
+export { ConnectionWrapper, IConnectOptions, IConnectionWrapperEvents } from './connection-wrapper';
+export { ChannelWrapper, IChannelWrapperEvents } from './channel-wrapper';

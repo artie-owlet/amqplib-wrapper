@@ -2,21 +2,71 @@ import EventEmitter from 'events';
 
 import { Channel } from 'amqplib';
 
-export interface IChannelWrapper<ChannelType extends Channel> extends EventEmitter {
-    getChannel(): Promise<ChannelType | null>;
-    getChannelSync(): ChannelType | null;
-    close(): Promise<void>;
-    reset(): Promise<void>;
-    on(event: 'open', listener: (chan: ChannelType) => void): this;
-    on(event: 'close', listener: () => void): this;
-    on(event: 'error', listener: (err: Error) => void): this;
+/**
+ * Dummy interface describing [[ChannelWrapper]] events
+ */
+export interface IChannelWrapperEvents<ChannelType extends Channel> {
+    /**
+     * Emitted every time a new channel is opened
+     */
+    open: (chan: ChannelType) => void;
+    /**
+     * Emitted when the channel is closed and ChannelWrapper will not open a new one
+     */
+    close: () => void;
+    /**
+     * Channel error
+     */
+    error: (err: Error) => void;
 }
 
-export class ChannelWrapper<ChannelType extends Channel> extends EventEmitter implements IChannelWrapper<ChannelType> {
+// eslint-disable-next-line @typescript-eslint/naming-convention
+export interface ChannelWrapper<ChannelType extends Channel> {
+    /**
+     * Events are documented [[IChannelWrapperEvents | here]]
+     */
+    on<E extends keyof IChannelWrapperEvents<ChannelType>>(
+        event: E,
+        listener: IChannelWrapperEvents<ChannelType>[E]
+    ): this;
+    /**@hidden */
+    once<E extends keyof IChannelWrapperEvents<ChannelType>>(
+        event: E,
+        listener: IChannelWrapperEvents<ChannelType>[E]
+    ): this;
+    /**@hidden */
+    addListener<E extends keyof IChannelWrapperEvents<ChannelType>>(
+        event: E,
+        listener: IChannelWrapperEvents<ChannelType>[E]
+    ): this;
+    /**@hidden */
+    prependListener<E extends keyof IChannelWrapperEvents<ChannelType>>(
+        event: E,
+        listener: IChannelWrapperEvents<ChannelType>[E]
+    ): this;
+    /**@hidden */
+    prependOnceListener<E extends keyof IChannelWrapperEvents<ChannelType>>(
+        event: E,
+        listener: IChannelWrapperEvents<ChannelType>[E]
+    ): this;
+    /**@hidden */
+    emit<E extends keyof IChannelWrapperEvents<ChannelType>>(
+        event: E,
+        ...params: Parameters<IChannelWrapperEvents<ChannelType>[E]>
+    ): boolean;
+}
+
+/**
+ * Wrapper for amqplib Channel
+ */
+export class ChannelWrapper<ChannelType extends Channel> extends EventEmitter {
     private openPromise: Promise<void>;
     private chan: ChannelType | null = null;
     private closed = false;
 
+    /**
+     * @hidden
+     */
     constructor(
         private createChannel: () => Promise<ChannelType | null>,
     ) {
@@ -24,6 +74,9 @@ export class ChannelWrapper<ChannelType extends Channel> extends EventEmitter im
         this.openPromise = this.open();
     }
 
+    /**
+     * Get amqplib Channel (or ConfirmChannel). Returns `null` if channel was closed with error or manually
+     */
     public async getChannel(): Promise<ChannelType | null> {
         if (this.closed) {
             return null;
@@ -32,10 +85,16 @@ export class ChannelWrapper<ChannelType extends Channel> extends EventEmitter im
         return this.chan;
     }
 
+    /**
+     * Returns channel if it is currently open, otherwise `null`
+     */
     public getChannelSync(): ChannelType | null {
         return this.chan;
     }
 
+    /**
+     * Stop wrapper and close channel
+     */
     public async close(): Promise<void> {
         this.closed = true;
         if (this.chan) {
@@ -43,6 +102,9 @@ export class ChannelWrapper<ChannelType extends Channel> extends EventEmitter im
         }
     }
 
+    /**
+     * Close channel and open a new one
+     */
     public async reset(): Promise<void> {
         await this.close();
         this.closed = false;
@@ -68,7 +130,7 @@ export class ChannelWrapper<ChannelType extends Channel> extends EventEmitter im
             this.emit('open', this.chan);
         } catch (err) {
             this.closed = true;
-            this.emit('error', err);
+            this.emit('error', err as Error);
         }
     }
 
@@ -76,8 +138,9 @@ export class ChannelWrapper<ChannelType extends Channel> extends EventEmitter im
         this.chan = null;
         if (!this.closed) {
             this.openPromise = Promise.resolve().then(this.open.bind(this));
+        } else {
+            this.emit('close');
         }
-        this.emit('close');
     }
 
     private onError(err: Error): void {

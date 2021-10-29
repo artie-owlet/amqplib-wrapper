@@ -1,0 +1,4 @@
+/* override methods list */
+.tsd-index-panel ul.tsd-index-list {
+    column-count: 2 !important;
+}
