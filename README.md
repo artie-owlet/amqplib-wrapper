@@ -41,4 +41,4 @@ chanWrap.on('open', async (chan) => {
 
 ## API
 
-See artie-owlet.github.io/amqplib-wrapper
+See https://artie-owlet.github.io/amqplib-wrapper/
