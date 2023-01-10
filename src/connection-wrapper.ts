@@ -29,21 +29,24 @@ async function sleep(ms: number): Promise<void> {
 }
 
 /**
- * Dummy interface describing [[ConnectionWrapper]] events
+ * {@link ConnectionWrapper} events
  */
 export interface IConnectionWrapperEvents {
     /**
      * Emitted every time a new connection is opened
+     * @event
      * @param prop peer-properties send by RabbitMQ in start method
      * (see [AMQP reference](https://www.rabbitmq.com/amqp-0-9-1-reference.html#connection.start))
      */
     connect: (prop: ServerProperties) => void;
     /**
      * Emitted when the connection is closed and ConnectionWrapper will not open a new one
+     * @event
      */
     close: () => void;
     /**
      * Connection error
+     * @event
      */
     error: (err: Error) => void;
 }
@@ -51,7 +54,7 @@ export interface IConnectionWrapperEvents {
 // eslint-disable-next-line @typescript-eslint/naming-convention
 export interface ConnectionWrapper {
     /**
-     * Events are documented [[IConnectionWrapperEvents | here]]
+     * Events are documented {@link IConnectionWrapperEvents | here}
      */
     on<E extends keyof IConnectionWrapperEvents>(
         event: E,
@@ -97,7 +100,7 @@ export class ConnectionWrapper extends EventEmitter {
     /**
      * Start work
      * @param connectOptions Extends [amqplib connection options](https://www.squaremobius.net/amqp.node/channel_api.html#connect)
-     * with additional parameter [[IConnectOptions.reconnectTimeout | reconnectTimeout]] (both AMQP URI and object)
+     * with additional parameter {@link IConnectOptions.reconnectTimeout | reconnectTimeout} (both AMQP URI and object)
      * @param socketOptions See [amqplib reference](https://www.squaremobius.net/amqp.node/channel_api.html#socket-options)
      */
     constructor(

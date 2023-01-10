@@ -3,7 +3,7 @@ import EventEmitter from 'events';
 import { Channel } from 'amqplib';
 
 /**
- * Dummy interface describing [[ChannelWrapper]] events
+ * Dummy interface describing {@link ChannelWrapper} events
  */
 export interface IChannelWrapperEvents<ChannelType extends Channel> {
     /**
@@ -23,7 +23,7 @@ export interface IChannelWrapperEvents<ChannelType extends Channel> {
 // eslint-disable-next-line @typescript-eslint/naming-convention
 export interface ChannelWrapper<ChannelType extends Channel> {
     /**
-     * Events are documented [[IChannelWrapperEvents | here]]
+     * Events are documented {@link IChannelWrapperEvents | here}
      */
     on<E extends keyof IChannelWrapperEvents<ChannelType>>(
         event: E,
